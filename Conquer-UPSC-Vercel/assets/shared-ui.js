@@ -1,0 +1,1 @@
+(function(){const d=document.getElementById('shared-ai-dialog');window.openSharedAI=function(){ConquerAI.mount(document.getElementById('shared-ai-container'));if(!d.open)d.showModal();};document.getElementById('shared-ai-open').onclick=openSharedAI;document.getElementById('shared-ai-close').onclick=()=>d.close();})();

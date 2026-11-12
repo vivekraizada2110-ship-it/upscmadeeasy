@@ -1,0 +1,166 @@
+{
+  "testDate": "2026-11-12",
+  "originalPacks": {
+    "conquer": {
+      "bytes": 254409,
+      "sha256": "33d6207b810ec6bd6cb80a9468c83aa368382e0ae5f59da5c36360f8e9aa49d9",
+      "matchesUploadedOriginal": true
+    },
+    "gs1": {
+      "bytes": 4711137,
+      "sha256": "dacf978ccd7186d2eef4ec836c17e18611fb7cebdf1753abe773f41e2447aa41",
+      "matchesUploadedOriginal": true
+    },
+    "gs2": {
+      "bytes": 3948299,
+      "sha256": "e942173f544312021b98de5208cb3d90499f229b4b0abb98a907e23323149228",
+      "matchesUploadedOriginal": true
+    },
+    "gs3": {
+      "bytes": 11297673,
+      "sha256": "b004f17e6059c9f2dae21eced9f07a431cd60e3681bd7aa5fac4e00d5e06d2ff",
+      "matchesUploadedOriginal": true
+    },
+    "gs4": {
+      "bytes": 3590441,
+      "sha256": "a06ca5f4255350851eb77fdfdccef65ba1416a5a864889495270e92d6f54f61c",
+      "matchesUploadedOriginal": true
+    },
+    "anthro": {
+      "bytes": 6523947,
+      "sha256": "743ae19fe1b9367db9d53487bc16c22fd606085414b2a6eb8d29394e0fac3a74",
+      "matchesUploadedOriginal": true
+    },
+    "essay": {
+      "bytes": 888540,
+      "sha256": "239c8f3bd53b959d4d69a216d35d82d9ce09687a63d6e82092f00593d050ffcb",
+      "matchesUploadedOriginal": true
+    },
+    "assets": {
+      "bytes": 2576480,
+      "sha256": "24b418f0caba8b204bd1f01f9c5b5f424583eafff4ebe8c160a5bddb8a12e39a",
+      "matchesUploadedOriginal": true
+    },
+    "copies": {
+      "bytes": 6626821,
+      "sha256": "eb48a1d1be5c1096dccd9aab194baa71147aef6354be18db4dd80d1d59c05431",
+      "matchesUploadedOriginal": true
+    },
+    "essaycopies": {
+      "bytes": 7798941,
+      "sha256": "b53a8fdd0b6dc3cb346ec5d5c40b5b7a0803b540fee5be56c2271370914053e5",
+      "matchesUploadedOriginal": true
+    },
+    "tracker": {
+      "bytes": 94729,
+      "sha256": "56422f3c042c3c5ded81995fda986e3ea2e5fd88d5c8409621e19e4bc84939c9",
+      "matchesUploadedOriginal": true
+    }
+  },
+  "startup": {
+    "pages": {
+      "tracker": {
+        "seconds": 0.05,
+        "chars": 2080,
+        "title": "Conquer UPSC \u2014 Daily Target Tracker"
+      },
+      "conquer": {
+        "seconds": 0.47,
+        "chars": 945,
+        "title": "Conquer UPSC \u2014 Reliable Progress Edition"
+      },
+      "gs1": {
+        "seconds": 0.76,
+        "chars": 2783,
+        "title": "GS1 Atlas \u2014 Your answer-writing studio"
+      },
+      "gs2": {
+        "seconds": 0.49,
+        "chars": 2290,
+        "title": "GS2 Atlas \u2014 Your answer-writing studio"
+      },
+      "gs3": {
+        "seconds": 0.96,
+        "chars": 2868,
+        "title": "GS3 Atlas \u2014 Your answer-writing studio"
+      },
+      "gs4": {
+        "seconds": 0.5,
+        "chars": 3036,
+        "title": "GS4 Atlas \u2014 Ethics, integrity and answer-writing studio"
+      },
+      "essay": {
+        "seconds": 0.33,
+        "chars": 2312,
+        "title": "Essay Atlas \u2014 Your answer-writing studio"
+      },
+      "anthro": {
+        "seconds": 0.65,
+        "chars": 2576,
+        "title": "Anthro Atlas \u2014 Anthropology optional \u00b7 Answer-writing studio"
+      },
+      "mapping": {
+        "seconds": 0.31,
+        "chars": 1692,
+        "title": "Mapping Atlas \u00b7 UPSC PYQ Mapping"
+      }
+    },
+    "errors": []
+  },
+  "sharedAI": {
+    "providers": {
+      "openrouter": {
+        "workspaces": 9,
+        "requests": 9,
+        "allUseExactSelectedModel": true
+      },
+      "xai": {
+        "workspaces": 9,
+        "requests": 9,
+        "allUseExactSelectedModel": true
+      }
+    },
+    "pdfVisionConversion": true,
+    "boundedRetry": true,
+    "cancellation": true,
+    "errors": []
+  },
+  "providerAdapterUnitTests": {
+    "providers": [
+      "gemini",
+      "openrouter",
+      "xai",
+      "groq",
+      "deepseek",
+      "anthropic",
+      "openai"
+    ],
+    "fixedDestinationGuard": true,
+    "archiveStateless": true
+  },
+  "sources": {
+    "live": {
+      "weekly": 239,
+      "fortnightly": 599,
+      "monthly": 1631,
+      "yojanaTextPages": 63,
+      "answerCopyPacks": {
+        "copies": 3,
+        "essaycopies": 4
+      }
+    },
+    "sourceSetValidation": true,
+    "browserPdfUpload": true,
+    "errors": []
+  },
+  "additionalChecks": {
+    "repeatedLoginStartup": 5,
+    "vercelConfigFieldValidation": "passed against official schema",
+    "rootHTMLBytes": 599641,
+    "largestRepositoryFileBytes": 7693981,
+    "liveProviderInferenceTested": false,
+    "deployedToVercelAccount": false,
+    "providerReplies": "simulated fixtures; no fixture question is embedded in distributed content",
+    "liveArchiveRequests": "real public-source network requests"
+  }
+}

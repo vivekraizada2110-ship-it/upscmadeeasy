@@ -1,0 +1,98 @@
+CONQUER UPSC + MAPPING ATLAS — GITHUB / VERCEL HANDOFF
+
+THIS IS A COMPLETE REPOSITORY PACKAGE, NOT AN INDEX-ONLY UPDATE.
+No local connector, Python installation on your PC, or CMD window is required after deployment.
+Do not upload just index.html: bundles/, assets/, api/, lib/ and configuration files are essential.
+
+SAFE UPDATE OF YOUR EXISTING SITE
+1. Export important study backups from your current workspaces first. Make a backup branch in GitHub.
+2. Extract this ZIP on your computer. Open Conquer-UPSC-Vercel (the folder containing index.html).
+3. On a NEW GitHub branch, upload its CONTENTS to your website repository root:
+   index.html
+   assets/         shared AI, entrance, tracker, branding and frame loader
+   bundles/        original checksum-verified workspaces/libraries + Mapping Atlas
+   api/            ai.py and archive.py — Vercel Python Functions
+   lib/            archive parsing/PDF extraction helpers
+   requirements.txt
+   .python-version
+   vercel.json
+   .gitignore / .vercelignore
+   DEPLOY-TO-VERCEL.txt and VERIFICATION.json (optional on the public site)
+   Preserve any unrelated repository files. If your repository already has custom API/configuration
+   files, reconcile those rather than deleting unrelated functionality.
+   No individual file exceeds GitHub's 25 MB browser-upload limit.
+4. In the Vercel project connected to that repository:
+   - Framework preset: Other (no static-export-only preset).
+   - Root directory: the directory with index.html, vercel.json and requirements.txt.
+   - Build command: no custom build; the supplied configuration uses an empty build command.
+   - Output directory: . (project root), as supplied in vercel.json.
+   - Python: 3.12, supplied by .python-version. Vercel installs requirements.txt.
+   - The api/*.py files are native Python serverless functions; do not disable function detection.
+   - maxDuration is 300 seconds; use a current Fluid-compute configuration that permits this duration.
+     Your Vercel account/plan still determines its available limits and hosting charges.
+   - No API key environment variable is required. Each user configures their own key in the website.
+5. Create/test a PREVIEW deployment for the branch before merging/promoting it to production.
+6. Visit YOUR-PREVIEW-URL/api/archive?action=health
+   Expected JSON: {"ok":true,"version":4,"mode":"stateless-vercel"}
+   A 404/HTML response means the API files were not deployed as functions; do not promote that build.
+7. Log in using your EXISTING entrance credentials; they were not changed.
+   Open all nine tabs, then AI providers. Select the provider, paste the matching key,
+   save its exact model ID, and explicitly Test connection. A successful test in one page applies
+   to all workspaces. Fetch live models if your account cannot access the typed model.
+8. Open Mapping Atlas > PIB & Yojana and test one date range. Generate one selected item first.
+9. After these account-side checks pass, merge/promote the preview through your normal Vercel workflow.
+
+WHAT CHANGED
+- Mapping Atlas is a ninth workspace, using your original Conquer logo and yellow/black branding.
+- Shared Gemini / OpenRouter / xAI Grok connection works in Daily Targets, Prelims, GS1-GS4,
+  Essay, Anthropology and Mapping. Grok (xAI) and Groq are distinct providers.
+- Existing Prelims Claude/OpenAI and Mapping Groq/DeepSeek options are retained in shared settings.
+- Gemini default remains gemini-3.5-flash-lite; explicit model IDs are never silently renamed.
+- Root HTML loads lazily rather than parsing the entire 35 MB embedded package at startup.
+- Original eleven app/library/content packs are byte-identical to the uploaded workspace.
+- Startup has bounded timeouts and a recoverable Retry opening button.
+- AI transient errors (429/500/502/503/504) get at most two delayed retries, with cancellation.
+  Optional cross-provider fallback is OFF unless the user explicitly enables it.
+- Source archive requests are STATELESS. No local CMD connector or in-memory job/polling dependency.
+- Uploaded Yojana PDF text is extracted in the browser instead of sending a huge base64 file to Vercel.
+- Large Gemini attachments preserve the original direct-to-Google path; other requests use the
+  fixed-destination same-origin proxy. Non-Gemini PDF pages are rendered locally for vision models.
+
+DATA / SECURITY / LIMITS — PLEASE READ
+- Keep the same deployed domain to retain that domain's existing browser storage.
+  Study data from another domain or localhost is separate and needs its existing export/import tools.
+- Your original entrance screen is preserved. Its client-side password is NOT server authentication.
+  Anyone can inspect public frontend assets. For a private website use Vercel Deployment Protection
+  or a proper authenticated backend. No claim of production access control is made by the entrance.
+- Keys are never hardcoded into the repository or saved by the server-side application code.
+  Remembered keys live in browser localStorage, which is not encrypted. Do not use shared browsers.
+- Provider/API billing is separate from a consumer chat subscription. xAI Grok/direct DeepSeek and
+  many other model endpoints are paid. OpenRouter free-model availability is not guaranteed.
+- A hosted proxy cannot create provider capacity, remove rate limits, or guarantee account access.
+- Image/PDF-answer tasks need a vision-capable provider model. Use smaller selections if the hosted
+  body limit is reached (the site checks the limit before posting). Non-Gemini PDF batches are capped
+  at 12 selected pages; available payload/model limits may require fewer. No document pages are
+  silently dropped. Gemini direct requests remain subject to Google's own limits/CORS.
+- PIB scope is the official English PIB Delhi archive, all ministries; regional-office archives are not
+  silently claimed. Source retrieval still depends on upstream government websites.
+- Yojana loads the EXACT English issue listed in the official Publications Division public archive.
+  That public archive may lag publication. Missing issues are reported, not replaced by another month.
+  Upload your English issue PDF if necessary. Scanned pages without extractable text require OCR.
+- Other-provider schemas are provided in system instructions; original client validators still reject
+  invalid output. Model-generated content is not guaranteed factually perfect.
+
+VERIFICATION BOUNDARY
+- Browser startup/navigation, preserved packs, PDF handling, provider request routing, response parsing,
+  cancellation/retry, and actual public archive/PDF retrieval were tested before packaging.
+- Provider replies were simulated: no personal paid/free API key was available for live inference tests.
+- A real Vercel deployment was NOT created here; no access to your GitHub/Vercel account was provided.
+  Therefore the authenticated preview/deployment checks in steps 5-9 still need to run in your account.
+- See VERIFICATION.json for the recorded test results and preservation hashes.
+
+OFFICIAL IMPLEMENTATION REFERENCES
+https://vercel.com/docs/functions/runtimes/python/api-directory
+https://vercel.com/docs/functions/runtimes/python
+https://vercel.com/docs/functions/limitations
+https://vercel.com/docs/project-configuration/vercel-json
+https://openrouter.ai/docs/guides/features/structured-outputs
+https://docs.x.ai/developers/model-capabilities/legacy/chat-completions
