@@ -1,0 +1,17 @@
+{
+  "build": "Mapping Atlas routing fix + shell performance pass",
+  "tested_on": "local static server replicating Vercel (no rewrites, no cleanUrls, /api functions absent)",
+  "root_cause": "Inside an iframe with srcdoc, an href=\"#/...\" link resolves against the PARENT URL. Clicking any Atlas tab therefore navigated the frame to <site>/#/... and the whole workspace shell reloaded inside the frame (second login gate, duplicated 'UPSC workspace' header, then dead clicks).",
+  "fix": "Atlas now uses an in-memory router (route()/navigate() + one capture-phase click handler). No Atlas code writes location.hash, so the frame URL never changes.",
+  "atlas_nav_verified": {"Daily": true, "Subjects": true, "Practice": true, "Session": true, "Spaced": true, "Mistakebook": true, "AI settings": true, "PIB & Yojana": true, "History": true, "Flashcards": true, "Search": true, "Home": true},
+  "atlas_deep_verified": {"subject pills": 13, "theme links": 13, "theme page map svg": 1, "practice chips": 13, "quiz options": 4, "quiz Q1->Q2 advance": true, "quiz finish scorecard": true, "search 'Harappa' hits": 15, "find page opens": true, "home tiles": 19},
+  "frame_url_after_every_click": "about:srcdoc (never the site root)",
+  "nested_shell_after_every_click": false,
+  "console_errors": 0,
+  "page_errors": 0,
+  "other_workspaces_opened": {"tracker": "1.9s", "conquer": "2.1s", "gs1": "2.2s", "gs2": "2.0s", "gs3": "2.6s", "gs4": "1.8s", "essay": "1.6s", "anthro": "2.3s"},
+  "atlas_first_open_seconds": 0.6,
+  "perf_changes": ["Atlas no longer downloads or inlines the 2.5 MB PDF library pack (it had no PDF code)", "remaining bundles warm in idle time once per session, so repeat tab switches are instant", "3 leftover Cloudflare beacon scripts removed (they POSTed to /cdn-cgi/rum, which does not exist on Vercel - the only console error before)"],
+  "content_preserved": "All study apps, banks, atlases and the Mapping Atlas question data are byte-identical in behaviour; only routing and boot plumbing changed.",
+  "not_tested": ["Live AI calls with a real API key (fetch bridge unchanged from the previously tested build)", "Live PIB/Yojana retrieval from Vercel servers (api/archive.py unchanged; it is the same code tested earlier)"]
+}

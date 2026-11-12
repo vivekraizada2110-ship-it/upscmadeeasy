@@ -24,8 +24,8 @@ const sharedConnectionBridges={"atlas": "/* Provider-only integration. Original 
 function inject(html,id,assets){
 
  const guard='(function(){var id='+JSON.stringify(id)+';function send(kind,text){parent.postMessage({conquerWorkspace:true,id:id,kind:kind,text:text||""},"*");}window.addEventListener("error",function(e){if(e.message)send("startup-error",e.message);});window.addEventListener("unhandledrejection",function(e){send("startup-error",e.reason&&e.reason.message||String(e.reason));});document.addEventListener("DOMContentLoaded",function(){var count=0;function check(){var app=document.getElementById("app"),boot=document.getElementById("boot");if(app&&!app.classList.contains("hidden")&&getComputedStyle(app).display!=="none"){send("ready");return;}if(!app&&document.body&&document.body.innerText.trim().length>80){send("ready");return;}if(boot&&/could not|error|failed/i.test(boot.textContent)&&!boot.classList.contains("hidden")){send("startup-error",boot.textContent);return;}if(++count<200)setTimeout(check,100);else send("startup-error","The embedded app did not finish initialising.");}check();});})();';
- let boot=scriptTag(guard)+scriptTag(sharedConnectionBridges.fetch);if(id!=='tracker')boot+=scriptTag(assets['pdf.min.js'])+scriptTag(assets['pdf.worker.min.js']);
- if(id!=='conquer'&&id!=='tracker')boot+=scriptTag(assets['pdf-lib.min.js']);
+ let boot=scriptTag(guard)+scriptTag(sharedConnectionBridges.fetch);if(id!=='tracker'&&id!=='mapping')boot+=scriptTag(assets['pdf.min.js'])+scriptTag(assets['pdf.worker.min.js']);
+ if(id!=='conquer'&&id!=='tracker'&&id!=='mapping')boot+=scriptTag(assets['pdf-lib.min.js']);
  boot+=scriptTag('window.__SUITE_WORKER__="";if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc="";');
  // Explicit main-thread WorkerMessageHandler keeps PDF reading independent of file-origin worker restrictions.
  const doc=html.replace(/<head([^>]*)>/i,m=>m+boot); const extra=(id==='tracker'||id==='mapping')?'':scriptTag(id==='conquer'?sharedConnectionBridges.prelims:sharedConnectionBridges.atlas); const position=doc.lastIndexOf('</body>'); return position>=0?doc.slice(0,position)+extra+doc.slice(position):doc+extra;
@@ -36,13 +36,27 @@ window.openApp=async function(id,retry){if(!window.ConquerAccess?.granted){windo
  document.title=appNames[id]+' — Conquer UPSC';status.textContent=appNames[id];
  const existing=frames.get(id);if(existing&&existing.dataset.failed==='true')return openApp(id,true);if(existing){existing.hidden=false;if(existing.dataset.ready==='true')loading.hidden=true;else showLoading('Opening '+appNames[id]+'…');return;}
  showLoading('Opening '+appNames[id]+'…');if(pending.has(id))return;pending.set(id,true);timers.set(id,setTimeout(()=>fail(id,'Opening timed out. Retry this tab; no study data was deleted.'),90000));
- try{await new Promise(resolve=>setTimeout(resolve,0));const [html,assets]=await Promise.all([unpack(id),id==='tracker'?Promise.resolve({}):getAssets()]);if(!pending.has(id))return;const frame=document.createElement('iframe');frame.id='app-'+id;frame.name=id;frame.title=appNames[id];frame.hidden=active!==id;frame.setAttribute('role','tabpanel');frame.setAttribute('aria-labelledby','tab-'+id);frames.set(id,frame);document.getElementById('workspace').append(frame);clearTimeout(timers.get(id));timers.set(id,setTimeout(()=>fail(id,'Initialisation timed out. Retry this tab; check that all bundles and assets were deployed together.'),60000));frame.srcdoc=inject(html,id,assets);}
+ try{await new Promise(resolve=>setTimeout(resolve,0));const [html,assets]=await Promise.all([unpack(id),(id==='tracker'||id==='mapping')?Promise.resolve({}):getAssets()]);if(!pending.has(id))return;const frame=document.createElement('iframe');frame.id='app-'+id;frame.name=id;frame.title=appNames[id];frame.hidden=active!==id;frame.setAttribute('role','tabpanel');frame.setAttribute('aria-labelledby','tab-'+id);frames.set(id,frame);document.getElementById('workspace').append(frame);clearTimeout(timers.get(id));timers.set(id,setTimeout(()=>fail(id,'Initialisation timed out. Retry this tab; check that all bundles and assets were deployed together.'),60000));frame.srcdoc=inject(html,id,assets);}
  catch(e){fail(id,e.message||String(e));}
 };
 window.addEventListener('message',event=>{const data=event.data;if(!data||!data.conquerWorkspace||!ids.includes(data.id))return;const frame=frames.get(data.id);if(!frame||event.source!==frame.contentWindow)return;if(data.kind==='ready'){frame.dataset.ready='true';pending.delete(data.id);clearTimeout(timers.get(data.id));timers.delete(data.id);if(active===data.id){loading.hidden=true;status.textContent=appNames[data.id];}}else if(data.kind==='startup-error'&&frame.dataset.ready!=='true'){fail(data.id,data.text||'The app reported a startup error.');}});
 const nav=document.querySelector('nav');nav.addEventListener('click',event=>{const button=event.target.closest('button[data-workspace]');if(button)openApp(button.dataset.workspace);});nav.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();let i=ids.indexOf(active);i=event.key==='Home'?0:event.key==='End'?ids.length-1:(i+(event.key==='ArrowRight'?1:ids.length-1))%ids.length;openApp(ids[i]);document.getElementById('tab-'+ids[i]).focus();});
 /* boots the default workspace the moment the gates are unlocked (never waits for a tab click) */
 window.__bootApp=function(force){try{const id=window.__pendingApp||'tracker';window.__pendingApp=null;if(force){const old=frames.get(id);if(old){old.remove();frames.delete(id);pending.delete(id);}}const have=frames.get(id);if(have&&have.dataset.ready==='true'){loading.hidden=true;return;}openApp(id,!!force);}catch(e){}};
+
+/* Once the first workspace is up, warm the remaining bundles in idle time (once per session)
+   so switching tabs does not wait on a 3-8 MB download + unpack. */
+let warmStarted=false;
+function warm(){
+ if(warmStarted)return;warmStarted=true;
+ try{if(sessionStorage.getItem('conquer-warm-v1'))return;sessionStorage.setItem('conquer-warm-v1','1');}catch(_){}
+ const order=['conquer','mapping','gs1','gs4','gs2','essay','anthro','gs3'];let i=0;
+ const next=()=>{if(i>=order.length)return;const id=order[i++];if(cache.has(id))return next();
+  unpack(id).catch(()=>{}).finally(()=>setTimeout(next,350));};
+ setTimeout(()=>getAssets().catch(()=>{}).finally(next),600);
+}
+window.addEventListener('load',()=>{const idle=window.requestIdleCallback||(fn=>setTimeout(fn,1500));idle(()=>warm());});
+window.__warmBundles=warm;
 window.workspaceDiagnostics={manifest:manifest,verifyAll:async function(){const results={};for(const id of Object.keys(manifest)){await unpack(id);results[id]='verified';}return results;},get active(){return active;}};
 openApp('tracker');
 })();
