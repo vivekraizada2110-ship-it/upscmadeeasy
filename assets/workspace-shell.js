@@ -28,8 +28,15 @@ function inject(html,id,assets){
  if(id!=='conquer'&&id!=='tracker'&&id!=='mapping')boot+=scriptTag(assets['pdf-lib.min.js']);
  boot+=scriptTag('window.__SUITE_WORKER__="";if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc="";');
  // Explicit main-thread WorkerMessageHandler keeps PDF reading independent of file-origin worker restrictions.
- const doc=html.replace(/<head([^>]*)>/i,m=>m+boot); const extra=(id==='tracker'||id==='mapping')?'':scriptTag(id==='conquer'?sharedConnectionBridges.prelims:sharedConnectionBridges.atlas); const position=doc.lastIndexOf('</body>'); return position>=0?doc.slice(0,position)+extra+doc.slice(position):doc+extra;
+ const doc=html.replace(/<head([^>]*)>/i,m=>m+boot); const extra=(id==='tracker'||id==='mapping'||id==='affairs')?'':scriptTag(id==='conquer'?sharedConnectionBridges.prelims:sharedConnectionBridges.atlas); const position=doc.lastIndexOf('</body>'); return position>=0?doc.slice(0,position)+extra+doc.slice(position):doc+extra;
 }
+
+let affairsMount=null;
+window.mountCurrentAffairs=async function(host){
+ if(affairsMount){host.replaceChildren(await affairsMount);return;}
+ affairsMount=(async()=>{const [html,assets]=await Promise.all([unpack('affairs'),getAssets()]);const f=host.ownerDocument.createElement('iframe');f.id='prelims-current-affairs';f.title='PIB & Yojana';f.style.cssText='display:block;width:100%;height:calc(100vh - 140px);min-height:700px;border:0;background:#0a0a0a';host.replaceChildren(f);f.srcdoc=inject(html,'affairs',assets);return f;})();
+ try{await affairsMount;}catch(e){affairsMount=null;throw e;}
+};
 function fail(id,message){const bad=frames.get(id);if(bad)bad.dataset.failed='true';clearTimeout(timers.get(id));timers.delete(id);pending.delete(id);if(active===id){status.textContent=appNames[id]+' · retry available';showLoading(message,true);}}
 window.openApp=async function(id,retry){if(!window.ConquerAccess?.granted){window.__pendingApp=id;return;}if(window.ConquerTracker?.guard(id))id='tracker';if(!ids.includes(id))return;active=id;document.querySelectorAll('nav [role="tab"]').forEach(b=>{const selected=b.id==='tab-'+id;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;});if(retry){const old=frames.get(id);if(old)old.remove();frames.delete(id);pending.delete(id);clearTimeout(timers.get(id));}
  for(const [key,frame] of frames)frame.hidden=key!==id;
@@ -42,14 +49,14 @@ window.openApp=async function(id,retry){if(!window.ConquerAccess?.granted){windo
 window.addEventListener('message',event=>{const data=event.data;if(!data||!data.conquerWorkspace||!ids.includes(data.id))return;const frame=frames.get(data.id);if(!frame||event.source!==frame.contentWindow)return;if(data.kind==='ready'){frame.dataset.ready='true';pending.delete(data.id);clearTimeout(timers.get(data.id));timers.delete(data.id);if(active===data.id){loading.hidden=true;status.textContent=appNames[data.id];}}else if(data.kind==='startup-error'&&frame.dataset.ready!=='true'){fail(data.id,data.text||'The app reported a startup error.');}});
 const nav=document.querySelector('nav');nav.addEventListener('click',event=>{const button=event.target.closest('button[data-workspace]');if(button)openApp(button.dataset.workspace);});nav.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();let i=ids.indexOf(active);i=event.key==='Home'?0:event.key==='End'?ids.length-1:(i+(event.key==='ArrowRight'?1:ids.length-1))%ids.length;openApp(ids[i]);document.getElementById('tab-'+ids[i]).focus();});
 /* boots the default workspace the moment the gates are unlocked (never waits for a tab click) */
-window.__bootApp=function(force){try{const id=window.__pendingApp||'tracker';window.__pendingApp=null;if(force){const old=frames.get(id);if(old){old.remove();frames.delete(id);pending.delete(id);}}const have=frames.get(id);if(have&&have.dataset.ready==='true'){loading.hidden=true;return;}openApp(id,!!force);}catch(e){}};
+window.__bootApp=function(force){try{const id=window.__pendingApp||(localStorage.getItem('conquer-prelims-last-page')==='affairs'?'conquer':'tracker');window.__pendingApp=null;if(force){const old=frames.get(id);if(old){old.remove();frames.delete(id);pending.delete(id);}}const have=frames.get(id);if(have&&have.dataset.ready==='true'){loading.hidden=true;return;}openApp(id,!!force);}catch(e){}};
 
 /* Once the first workspace is up, warm the remaining bundles in idle time (once per session)
    so switching tabs does not wait on a 3-8 MB download + unpack. */
 let warmStarted=false;
 function warm(){
  if(warmStarted)return;warmStarted=true;
- try{if(sessionStorage.getItem('conquer-warm-v1'))return;sessionStorage.setItem('conquer-warm-v1','1');}catch(_){}
+ if(navigator.connection?.saveData)return;
  const order=['conquer','mapping','gs1','gs4','gs2','essay','anthro','gs3'];let i=0;
  const next=()=>{if(i>=order.length)return;const id=order[i++];if(cache.has(id))return next();
   unpack(id).catch(()=>{}).finally(()=>setTimeout(next,350));};
@@ -58,5 +65,5 @@ function warm(){
 window.addEventListener('load',()=>{const idle=window.requestIdleCallback||(fn=>setTimeout(fn,1500));idle(()=>warm());});
 window.__warmBundles=warm;
 window.workspaceDiagnostics={manifest:manifest,verifyAll:async function(){const results={};for(const id of Object.keys(manifest)){await unpack(id);results[id]='verified';}return results;},get active(){return active;}};
-openApp('tracker');
+openApp(localStorage.getItem('conquer-prelims-last-page')==='affairs'?'conquer':'tracker');
 })();

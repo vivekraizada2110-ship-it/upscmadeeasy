@@ -40,7 +40,7 @@ def month_pib(year, month):
   if not chosen or chosen.get('value')!=val:raise ValueError('PIB did not apply archive filter '+suffix+'; refusing to show current-day results as an archive.')
  selected=p.select_one('#Bar1_ddlLang option[selected]')
  if not selected or selected.get('value')!='1':raise ValueError('PIB did not return English.')
- out=[]; seen=set(); undated=0; language_rejected=0
+ out=[]; seen=set(); undated=0
  for a in p.select('a[href*="PRID="]'):
   li=a.find_parent('li');stamp=li.select_one('.publishdatesmall') if li else None
   if not stamp:continue
@@ -52,13 +52,13 @@ def month_pib(year, month):
   if (dt.year,dt.month)!=(year,month):raise ValueError('PIB returned an out-of-month release; archive validation failed.')
   title=a.get_text(' ',strip=True);prid=re.search(r'PRID=(\d+)',a['href']).group(1)
   if prid in seen:continue
-  if not english(title):language_rejected+=1;continue
+  language='English' if english(title) else 'Hindi / mixed'
   seen.add(prid)
-  out.append({'id':prid,'title':title,'date':dt.isoformat(),'link':f'https://www.pib.gov.in/PressReleaseDetail.aspx?PRID={prid}&reg=3&lang=1','source':'pib'})
+  out.append({'id':prid,'title':title,'date':dt.isoformat(),'link':f'https://www.pib.gov.in/PressReleaseDetail.aspx?PRID={prid}&reg=3&lang=1','source':'pib','language':language})
  advertised=re.search(r'Displaying\s+(\d+)\s+Press Releases',p.get_text(' ',strip=True))
  count=int(advertised.group(1)) if advertised else None
- if undated or language_rejected:raise ValueError(f'Archive contained {undated} undated and {language_rejected} non-English rows; refusing to claim full coverage.')
- if count is None or count!=len(out):raise ValueError(f'PIB advertised {count} releases, but {len(out)} dated English rows were parsed. Archive may have changed; complete coverage not verified.')
+ if undated:raise ValueError(f'Archive contained {undated} undated rows; refusing to claim full coverage.')
+ if count is None or count!=len(out):raise ValueError(f'PIB advertised {count} releases, but {len(out)} dated source rows were parsed. Archive may have changed; complete coverage not verified.')
  result={'items':out,'advertised':count};CACHE[key]=(time.time(),result);return result
 
 def pib_range(start,end,progress=lambda x:None):
@@ -82,12 +82,11 @@ def pdf_sections(blob,month,year,url):
  doc=pymupdf.open(stream=blob,filetype='pdf');items=[]
  for i,page in enumerate(doc):
   text=page.get_text().strip()
-  if len(re.findall('[A-Za-z]',text))<60:continue
-  if len(re.findall('[\u0900-\u097f]',text))>20:continue
+  if len(re.findall('[A-Za-z\u0900-\u097f]',text))<60:continue
   lines=[re.sub(r'\s+',' ',v).strip() for v in text.splitlines() if len(v.strip())>12]
   heading=' · '.join(lines[:2])[:180] or f'Page {i+1}'
   items.append({'id':f'{year}-{month:02d}-p{i+1}','title':f'Page {i+1} — {heading}','date':f'{year}-{month:02d}','link':url+f'#page={i+1}','text':text,'source':'yojana','page':i+1})
- if not items:raise ValueError('No English selectable text found. Scanned issues need OCR; this connector does not pretend to read them.')
+ if not items:raise ValueError('No selectable source text found. Scanned issues need OCR; this connector does not pretend to read them.')
  return {'source':'yojana','start':f'{year}-{month:02d}-01','end':f'{year}-{month:02d}-{calendar.monthrange(year,month)[1]}','items':items,'complete':len(items)==len(doc),'pdf_pages':len(doc),'text_pages':len(items),'issue':f'{calendar.month_name[month]} {year}','url':url,'coverage':f'English Yojana issue; {len(items)} pages with extractable English text out of {len(doc)} PDF pages. Page sections, not inferred article boundaries. No weekly issue exists.'}
 
 def yojana_issue(month,year,progress=lambda x:None):
@@ -109,9 +108,8 @@ def article(prid):
  if not re.fullmatch(r'\d{4,12}',prid):raise ValueError('Invalid PIB release ID.')
  url=f'https://www.pib.gov.in/PressReleasePage.aspx?PRID={prid}&reg=3&lang=1';r=session().get(url,timeout=75);r.raise_for_status();p=BeautifulSoup(r.content,'html.parser')
  body=p.select_one('#pibReleaseBody') or p.select_one('.innner-page-main-about-us-content-right-part') or p.select_one('.releasebody')
- if not body:raise ValueError('Official release body could not be identified; refusing to use navigation text.')
+ if not body:raise ValueError(f'PIB release {prid}: official release body could not be identified. Source: {url}')
  for n in body.select('script,style,nav'):n.decompose()
  text=body.get_text('\n',strip=True)
- if not english(text):raise ValueError('Release is not English; it was not passed to generation.')
- return {'id':prid,'text':text,'link':url}
+ return {'id':prid,'text':text,'link':url,'language':'English' if english(text) else 'Hindi / mixed','title':(p.select_one('h2') or body).get_text(' ',strip=True)[:400]}
 

@@ -408,6 +408,6 @@ form.addEventListener('submit',async e=>{
   setTimeout(()=>{if(!finished)finish();},REVEAL_MS+2500);
 });
 /* focus the first field without letting the browser scroll the scene */
-setTimeout(()=>{try{user.focus({preventScroll:true})}catch(e){}},120);
+setTimeout(()=>{try{if(!busy&&!user.value&&!password.value&&(document.activeElement===document.body||document.activeElement===document.documentElement))user.focus({preventScroll:true});}catch(e){}},120);
 window.addEventListener('pagehide',stopScore);window.addEventListener('beforeunload',()=>{try{scoreAudio.pause()}catch(e){}});
 })();

@@ -1,17 +1,111 @@
 {
-  "build": "Mapping Atlas routing fix + shell performance pass",
-  "tested_on": "local static server replicating Vercel (no rewrites, no cleanUrls, /api functions absent)",
-  "root_cause": "Inside an iframe with srcdoc, an href=\"#/...\" link resolves against the PARENT URL. Clicking any Atlas tab therefore navigated the frame to <site>/#/... and the whole workspace shell reloaded inside the frame (second login gate, duplicated 'UPSC workspace' header, then dead clicks).",
-  "fix": "Atlas now uses an in-memory router (route()/navigate() + one capture-phase click handler). No Atlas code writes location.hash, so the frame URL never changes.",
-  "atlas_nav_verified": {"Daily": true, "Subjects": true, "Practice": true, "Session": true, "Spaced": true, "Mistakebook": true, "AI settings": true, "PIB & Yojana": true, "History": true, "Flashcards": true, "Search": true, "Home": true},
-  "atlas_deep_verified": {"subject pills": 13, "theme links": 13, "theme page map svg": 1, "practice chips": 13, "quiz options": 4, "quiz Q1->Q2 advance": true, "quiz finish scorecard": true, "search 'Harappa' hits": 15, "find page opens": true, "home tiles": 19},
-  "frame_url_after_every_click": "about:srcdoc (never the site root)",
-  "nested_shell_after_every_click": false,
-  "console_errors": 0,
-  "page_errors": 0,
-  "other_workspaces_opened": {"tracker": "1.9s", "conquer": "2.1s", "gs1": "2.2s", "gs2": "2.0s", "gs3": "2.6s", "gs4": "1.8s", "essay": "1.6s", "anthro": "2.3s"},
-  "atlas_first_open_seconds": 0.6,
-  "perf_changes": ["Atlas no longer downloads or inlines the 2.5 MB PDF library pack (it had no PDF code)", "remaining bundles warm in idle time once per session, so repeat tab switches are instant", "3 leftover Cloudflare beacon scripts removed (they POSTed to /cdn-cgi/rum, which does not exist on Vercel - the only console error before)"],
-  "content_preserved": "All study apps, banks, atlases and the Mapping Atlas question data are byte-identical in behaviour; only routing and boot plumbing changed.",
-  "not_tested": ["Live AI calls with a real API key (fetch bridge unchanged from the previously tested build)", "Live PIB/Yojana retrieval from Vercel servers (api/archive.py unchanged; it is the same code tested earlier)"]
+  "update": "Prelims Current Affairs: durable auto-retrying source queue",
+  "tests": {
+    "workflow-results.json": {
+      "automatic_503_retry_and_refresh_resume": true,
+      "timeline_restored": {
+        "source": "pib",
+        "period": "monthly",
+        "end": "2026-11-13",
+        "month": 3,
+        "year": 2025
+      },
+      "no_duplicate_sets_or_questions": true,
+      "exact_failed_article_visible": true,
+      "hindi_translation_and_reader_cache": true,
+      "practice_and_history_clear": true,
+      "restart_set_then_delete_persists": true,
+      "mapping_routes_and_removed_sources_tab": true,
+      "all_nine_workspaces_open": true,
+      "pageerrors": [],
+      "expected_injected_http_faults": [
+        "article 422",
+        "AI 503 10002",
+        "AI 503 10001",
+        "article 422"
+      ],
+      "other_console_errors": [],
+      "ai_call_counts": {
+        "10002": 3,
+        "10001": 3
+      },
+      "article_call_counts": {
+        "10003": 2,
+        "10002": 1,
+        "10001": 1
+      }
+    },
+    "resilience-results.json": {
+      "yojana_429_auto_retry": true,
+      "yojana_timeline_survives_refresh": true,
+      "pause_stops_retry_then_resume_no_duplicates": true,
+      "invalid_key_stops_once_with_reason": true,
+      "malformed_json_retry": true,
+      "network_automatic_recovery": true,
+      "timeout_automatic_recovery": true,
+      "cross_tab_duplicate_lock": true,
+      "cross_tab_stale_storage_overwrite_blocked": true,
+      "start_over_deletes_all_sets": true,
+      "pageerrors": []
+    },
+    "pdf-migration-results.json": {
+      "legacy_source_sets_migrated_once": true,
+      "fortnight_and_custom_end_date_persist": true,
+      "uploaded_pdf_reader_loaded_and_extracts_text": true,
+      "uploaded_pdf_text_and_selection_survive_refresh": true,
+      "pageerrors": []
+    },
+    "ui-results.json": {
+      "all_prelims_navigation": true,
+      "ca_navigation_and_shared_settings": true,
+      "single_instance_on_repeated_open": true,
+      "pageerrors": [],
+      "console_errors": []
+    },
+    "backend-results.json": {
+      "hindi_fixture_pass": true,
+      "live_release": {
+        "id": "2335368",
+        "characters": 261,
+        "language": "English",
+        "url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2335368&reg=3&lang=1"
+      }
+    }
+  },
+  "verification_scope": "Chromium on local static hosting with the supplied no-rewrite Vercel routing. Browser inference/source-failure tests use intercepted deterministic replies, not live AI credentials. One official PIB article was retrieved live with the actual Python scraper. No actual Vercel deployment or paid AI calls performed.",
+  "unchanged_original_bundles": [
+    "bundles/copies.bin",
+    "bundles/gs1.bin",
+    "bundles/gs3.bin",
+    "bundles/essaycopies.bin",
+    "bundles/assets.bin",
+    "bundles/anthro.bin",
+    "bundles/gs2.bin",
+    "bundles/gs4.bin",
+    "bundles/tracker.bin",
+    "bundles/essay.bin"
+  ],
+  "mapping_question_and_map_data_unchanged": true,
+  "bundle_sha256": {
+    "conquer": "27ec413db552bbb35c3ad15e4bc640c50bb3c68c5d829bba5c3c97b9593d895f",
+    "gs1": "dacf978ccd7186d2eef4ec836c17e18611fb7cebdf1753abe773f41e2447aa41",
+    "gs2": "e942173f544312021b98de5208cb3d90499f229b4b0abb98a907e23323149228",
+    "gs3": "b004f17e6059c9f2dae21eced9f07a431cd60e3681bd7aa5fac4e00d5e06d2ff",
+    "gs4": "a06ca5f4255350851eb77fdfdccef65ba1416a5a864889495270e92d6f54f61c",
+    "anthro": "743ae19fe1b9367db9d53487bc16c22fd606085414b2a6eb8d29394e0fac3a74",
+    "essay": "239c8f3bd53b959d4d69a216d35d82d9ce09687a63d6e82092f00593d050ffcb",
+    "assets": "24b418f0caba8b204bd1f01f9c5b5f424583eafff4ebe8c160a5bddb8a12e39a",
+    "copies": "eb48a1d1be5c1096dccd9aab194baa71147aef6354be18db4dd80d1d59c05431",
+    "essaycopies": "b53a8fdd0b6dc3cb346ec5d5c40b5b7a0803b540fee5be56c2271370914053e5",
+    "tracker": "56422f3c042c3c5ded81995fda986e3ea2e5fd88d5c8409621e19e4bc84939c9",
+    "mapping": "fdd10e7607e3ff85098484d2e62f4bbd1d2b1e1af5fd46fa7676ef8f7c404ebe",
+    "affairs": "dd4349d06dcf207f3642718be0035013eeffd047b857e9a54ca9dbfca7639ee8"
+  },
+  "limitations": [
+    "Needs a working provider key/model. Cannot bypass rate limits or create quota.",
+    "Transient errors retry while the workspace is open; a closed browser resumes when reopened, not on a background server.",
+    "Authentication, balance and unavailable-model failures require corrected settings.",
+    "Unreadable scanned PDFs need OCR; no OCR added.",
+    "Translations and evidence checks are model-generated, not a guarantee of factual perfection."
+  ]
 }

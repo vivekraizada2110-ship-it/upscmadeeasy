@@ -24,7 +24,7 @@ async function api(action,id,model,payload,signal){
  const url=large?'https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent':'/api/ai';
  const response=await nativeFetch(url,{method:'POST',headers:large?{'Content-Type':'application/json','x-goog-api-key':s.key}:{'Content-Type':'application/json','Authorization':'Bearer '+s.key},body:large?JSON.stringify(payload):encoded,signal,...(large?{}:{credentials:'same-origin'})});
  const body=await response.json().catch(()=>({error:{message:'The hosted endpoint did not return JSON. Check Vercel function logs without sharing your key.'}}));
- if(!response.ok){const e=Error(body.error?.message||'Provider returned HTTP '+response.status);e.status=response.status;e.retryAfter=Number(response.headers.get('Retry-After'))||0;throw e;}
+ if(!response.ok){const e=Error(body.error?.message||'Provider returned HTTP '+response.status);e.status=response.status;const ra=response.headers.get('Retry-After');e.retryAfter=Math.max(0,Number(ra)||((Date.parse(ra)-Date.now())/1000)||0);throw e;}
  return body;
 }
 async function rawGenerate(payload,opts={}){
@@ -33,10 +33,10 @@ async function rawGenerate(payload,opts={}){
  const controller=new AbortController();const abort=()=>controller.abort();if(opts.signal?.aborted)controller.abort();opts.signal?.addEventListener('abort',abort,{once:true});const deadline=setTimeout(()=>controller.abort(),180000);
  try{
  for(const id of order){const target=id===primary?model:records[id].model;
- for(let attempt=0;attempt<3;attempt++){
+ for(let attempt=0;attempt<(opts.singleAttempt?1:3);attempt++){
  try{status(defs[id].name+' · '+target+' · '+(attempt?'retry '+attempt+'/2':'request running'),opts.onStatus);return await api('generate',id,target,payload,controller.signal);}
  catch(e){last=e;if(e.name==='AbortError')throw e;const transient=[429,500,502,503,504].includes(e.status);
- if(!transient||attempt===2||e.retryAfter>30)break;
+ if(opts.singleAttempt||!transient||attempt===2||e.retryAfter>30)break;
  const delay=Math.max(e.retryAfter*1000,[2000,5000][attempt])+Math.floor(Math.random()*300);status(defs[id].name+' temporarily unavailable (HTTP '+e.status+'). Retrying in '+Math.ceil(delay/1000)+'s; '+(attempt+1)+'/2.',opts.onStatus);await sleep(delay,controller.signal);}
  }
  }

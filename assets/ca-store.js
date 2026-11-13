@@ -1,0 +1,6 @@
+/* Current-affairs data uses IndexedDB rather than filling the 5MB localStorage quota. */
+(function(){'use strict';let dbPromise;
+function db(){return dbPromise||(dbPromise=new Promise((resolve,reject)=>{const r=indexedDB.open('conquer-current-affairs',1);r.onupgradeneeded=()=>{r.result.createObjectStore('state');r.result.createObjectStore('cache');};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.onblocked=()=>reject(Error('Another browser tab blocks current-affairs storage. Close that tab and reload.'));}));}
+async function op(store,mode,fn){const d=await db();return new Promise((resolve,reject)=>{const t=d.transaction(store,mode),r=fn(t.objectStore(store));t.oncomplete=()=>resolve(r.result);t.onerror=()=>reject(t.error||r.error);t.onabort=()=>reject(t.error||Error('Storage transaction aborted.'));});}
+window.CAStore={read:()=>op('state','readonly',s=>s.get('workspace')),write:v=>op('state','readwrite',s=>s.put(v,'workspace')),cacheGet:key=>op('cache','readonly',s=>s.get(key)),cachePut:(key,v)=>op('cache','readwrite',s=>s.put(v,key))};
+})();

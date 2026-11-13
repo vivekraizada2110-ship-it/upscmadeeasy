@@ -1,3 +1,37 @@
+CURRENT AFFAIRS UPDATE — READ FIRST
+PIB & Yojana is now under PRELIMS PRACTICE (not Mapping Atlas).
+Upload/replace the FULL contents of this package in the same repository root; this is not
+an index-only or three-file update. Keep the existing production domain for browser-data continuity.
+Do not run any CMD/Python launcher on your computer. Vercel hosts the existing API functions.
+
+NEW BEHAVIOUR
+- Temporary provider errors retry automatically. Two workers overlap retrieval/generation.
+- Retry-After guidance is honoured. Exponential retry delay grows to a five-minute ceiling;
+  a longer provider-requested wait is honoured. Pause stops retrying and aborts client requests.
+- Closing/refreshing preserves dates, source, results, selection, completed questions and queue.
+  Reopen the site and log in normally; the saved current-affairs page and unfinished queue restore.
+  Generation runs in the open browser, not as an unattended Vercel background job.
+- Invalid credentials, payment/access failures or an unavailable model (401/402/403/404) stop safely
+  with the reason instead of retrying the same permanent account error indefinitely.
+- Existing saved source sets are copied from the old Mapping store on the first current-affairs open.
+  Original Mapping data is retained for safety; no automatic destructive migration occurs.
+- IndexedDB holds current-affairs state and cached source text/translations; do not clear site data.
+- One browser tab owns the current-affairs workspace at a time so stale tabs cannot overwrite progress.
+- Delete set, restart set, retry article errors, clear attempt history, and start-over controls confirm
+  destructive operations. Clearing history leaves question sets intact.
+- Hindi and mixed-language PIB bodies are not rejected. Questions/explanations are English; source
+  evidence remains in its original language. Read / translate displays a full English translation,
+  cached after the first translation. Generation/translation still require your working AI provider.
+- Unreadable/missing releases are labelled with title, date, ID and an exact official link.
+- Scanned/image-only PDFs still need OCR; this update does NOT add an OCR engine.
+- Optional backup providers are used only if YOU enabled them in shared AI settings. Normal provider
+  charges apply. A browser-side abort cannot guarantee the upstream provider stops work/billing.
+
+VERIFICATION BOUNDARY FOR THIS UPDATE
+The bundled VERIFICATION.json distinguishes live official-source retrieval from simulated-provider
+fault-injection tests. No user API key was available, and no deployment was made to your Vercel account.
+Use a preview deployment first. A successful browser test cannot guarantee provider capacity or quotas.
+
 CONQUER UPSC + MAPPING ATLAS — GITHUB / VERCEL HANDOFF
 
 THIS IS A COMPLETE REPOSITORY PACKAGE, NOT AN INDEX-ONLY UPDATE.
@@ -6,7 +40,7 @@ Do not upload just index.html: bundles/, assets/, api/, lib/ and configuration f
 
 SAFE UPDATE OF YOUR EXISTING SITE
 1. Export important study backups from your current workspaces first. Make a backup branch in GitHub.
-2. Extract this ZIP on your computer. Open Conquer-UPSC-Vercel (the folder containing index.html).
+2. Extract this ZIP on your computer. Open the extracted folder containing index.html.
 3. On a NEW GitHub branch, upload its CONTENTS to your website repository root:
    index.html
    assets/         shared AI, entrance, tracker, branding and frame loader
@@ -39,7 +73,7 @@ SAFE UPDATE OF YOUR EXISTING SITE
    Open all nine tabs, then AI providers. Select the provider, paste the matching key,
    save its exact model ID, and explicitly Test connection. A successful test in one page applies
    to all workspaces. Fetch live models if your account cannot access the typed model.
-8. Open Mapping Atlas > PIB & Yojana and test one date range. Generate one selected item first.
+8. Open Prelims Practice > PIB & Yojana and test one date range. Generate one selected item first.
 9. After these account-side checks pass, merge/promote the preview through your normal Vercel workflow.
 
 WHAT CHANGED
@@ -49,9 +83,9 @@ WHAT CHANGED
 - Existing Prelims Claude/OpenAI and Mapping Groq/DeepSeek options are retained in shared settings.
 - Gemini default remains gemini-3.5-flash-lite; explicit model IDs are never silently renamed.
 - Root HTML loads lazily rather than parsing the entire 35 MB embedded package at startup.
-- Original eleven app/library/content packs are byte-identical to the uploaded workspace.
+- Unrelated study-bank/content packs are unchanged. The Prelims and Mapping app bundles now include the requested navigation changes; Current Affairs has its own bundle.
 - Startup has bounded timeouts and a recoverable Retry opening button.
-- AI transient errors (429/500/502/503/504) get at most two delayed retries, with cancellation.
+- Other workspaces retain the previous bounded AI retries. The PIB/Yojana queue now retries transient 429/5xx/network/timeouts automatically, with backoff and user pause.
   Optional cross-provider fallback is OFF unless the user explicitly enables it.
 - Source archive requests are STATELESS. No local CMD connector or in-memory job/polling dependency.
 - Uploaded Yojana PDF text is extracted in the browser instead of sending a huge base64 file to Vercel.
