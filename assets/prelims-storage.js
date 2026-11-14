@@ -1,0 +1,5 @@
+/* Durable native Prelims DB; retain the existing question and attempt schema. */
+(function(){let chain=Promise.resolve();const oldDB=DB;let dirty=false;const S=parent.CAStore;window.PrelimsReady=(async()=>{const stored=await S.cacheGet('prelims-native-db-v1');if(stored){if(dirty)throw Error('Prelims received edits before saved progress loaded. Reload to recover safely.');DB=Object.assign(DB,stored);DB.bank=DB.bank||[];DB.sessions=DB.sessions||[];DB.mistakebook=DB.mistakebook||[];srInit();}parent.PrelimsNativeSnapshot=()=>DB;if(stored){renderDash();renderBank();srReminder();}})();
+ saveDB=function(){dirty=true;const snapshot=structuredClone(DB);if(snapshot.settings)delete snapshot.settings.apiKey;chain=chain.catch(()=>{}).then(()=>S.cachePut('prelims-native-db-v1',snapshot));chain.catch(e=>{toast('Prelims could not save: '+e.message+'. Export a backup before closing.');});parent.PrelimsNativeSnapshot=()=>DB;return true;};
+ window.PrelimsFlush=()=>chain;window.PrelimsReady.catch(e=>toast(e.message));
+})();

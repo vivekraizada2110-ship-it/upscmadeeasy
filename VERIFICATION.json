@@ -1,93 +1,77 @@
 {
-  "update": "Prelims Current Affairs: durable auto-retrying source queue",
+  "update": "Native Prelims integration, batch queue, coaching fix and shared Mains evidence",
   "tests": {
-    "workflow-results.json": {
-      "automatic_503_retry_and_refresh_resume": true,
-      "timeline_restored": {
-        "source": "pib",
-        "period": "monthly",
-        "end": "2026-11-13",
-        "month": 3,
-        "year": 2025
-      },
-      "no_duplicate_sets_or_questions": true,
-      "exact_failed_article_visible": true,
-      "hindi_translation_and_reader_cache": true,
-      "practice_and_history_clear": true,
-      "restart_set_then_delete_persists": true,
-      "mapping_routes_and_removed_sources_tab": true,
-      "all_nine_workspaces_open": true,
+    "test-native-results": {
+      "four_articles_one_generation_request": true,
+      "no_nested_current_affairs_frame": true,
+      "rename_and_native_subject_bank": true,
+      "native_quiz_wrong_answer_updates_single_mistakebook_and_revision": true,
+      "native_source_citation_preserved": true,
+      "relevant_mains_sources_and_retrieval": true,
+      "refresh_keeps_native_progress_and_timeline": true,
+      "manual_retry_waiting_batch_now": true,
+      "daily_target_coaching_uses_shared_provider": true,
       "pageerrors": [],
-      "expected_injected_http_faults": [
-        "article 422",
-        "AI 503 10002",
-        "AI 503 10001",
-        "article 422"
-      ],
-      "other_console_errors": [],
-      "ai_call_counts": {
-        "10002": 3,
-        "10001": 3
-      },
-      "article_call_counts": {
-        "10003": 2,
-        "10002": 1,
-        "10001": 1
-      }
+      "unexpected_console_errors": []
     },
-    "resilience-results.json": {
-      "yojana_429_auto_retry": true,
-      "yojana_timeline_survives_refresh": true,
-      "pause_stops_retry_then_resume_no_duplicates": true,
-      "invalid_key_stops_once_with_reason": true,
-      "malformed_json_retry": true,
-      "network_automatic_recovery": true,
-      "timeout_automatic_recovery": true,
-      "cross_tab_duplicate_lock": true,
-      "cross_tab_stale_storage_overwrite_blocked": true,
-      "start_over_deletes_all_sets": true,
+    "test-coach-ui-results": {
+      "actual_daily_target_coaching_button_success": true,
+      "actual_daily_target_coaching_button_error_is_local_not_boot_failure": true,
+      "no_saved_stuck_coaching_flag": true,
       "pageerrors": []
     },
-    "pdf-migration-results.json": {
-      "legacy_source_sets_migrated_once": true,
-      "fortnight_and_custom_end_date_persist": true,
-      "uploaded_pdf_reader_loaded_and_extracts_text": true,
-      "uploaded_pdf_text_and_selection_survive_refresh": true,
+    "test-evidence-results": {
+      "exact_duplicate_and_explicit_older_fact_removed": true,
+      "historical_reporting_period_not_deleted_as_stale": true,
+      "six_atlas_libraries_no_duplicate_source_entries": true,
+      "actual_answer_evaluation_payload_includes_new_current_affairs_and_dates": true,
+      "coaching_403_does_not_trigger_boot_failure_or_erase_record": true,
       "pageerrors": []
     },
-    "ui-results.json": {
-      "all_prelims_navigation": true,
-      "ca_navigation_and_shared_settings": true,
-      "single_instance_on_repeated_open": true,
-      "pageerrors": [],
-      "console_errors": []
+    "test-recovery-results": {
+      "failed_article_has_identified_manual_retry": true,
+      "refresh_automatically_resumes_saved_unfinished_batch": true,
+      "manual_failed_retry_then_auto_provider_retry": true,
+      "pageerrors": []
     },
-    "backend-results.json": {
-      "hindi_fixture_pass": true,
-      "live_release": {
-        "id": "2335368",
-        "characters": 261,
-        "language": "English",
-        "url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2335368&reg=3&lang=1"
-      }
+    "test-migrate-results": {
+      "existing_sets_and_selected_timeline_migrate_into_native_prelims": true,
+      "standard_current_affairs_pdf_upload_indexes_relevant_atlas_material": true,
+      "repeated_pdf_upload_does_not_duplicate_evidence": true,
+      "migration_does_not_repeat_on_reload": true,
+      "pageerrors": []
+    },
+    "test-stress-results": {
+      "synthetic_articles": 1260,
+      "completed": 1260,
+      "native_bank_questions": 1260,
+      "generation_requests": 315,
+      "test_elapsed_seconds": 15.1,
+      "latency_note": "Deterministic, immediate simulated API replies; NOT a real-provider throughput promise.",
+      "bottom_controls_reachable_at_1024x768": true,
+      "pageerrors": []
     }
   },
-  "verification_scope": "Chromium on local static hosting with the supplied no-rewrite Vercel routing. Browser inference/source-failure tests use intercepted deterministic replies, not live AI credentials. One official PIB article was retrieved live with the actual Python scraper. No actual Vercel deployment or paid AI calls performed.",
-  "unchanged_original_bundles": [
-    "bundles/copies.bin",
-    "bundles/gs1.bin",
-    "bundles/gs3.bin",
-    "bundles/essaycopies.bin",
-    "bundles/assets.bin",
+  "static_validation": {
+    "bundle_hashes_match": true,
+    "all_external_and_changed_inline_js_syntax_passed": true,
+    "python_functions_compile": true,
+    "retired_nested_affairs_app_removed": true
+  },
+  "unchanged_bundles": [
     "bundles/anthro.bin",
+    "bundles/assets.bin",
+    "bundles/copies.bin",
+    "bundles/essay.bin",
+    "bundles/essaycopies.bin",
+    "bundles/gs1.bin",
     "bundles/gs2.bin",
+    "bundles/gs3.bin",
     "bundles/gs4.bin",
-    "bundles/tracker.bin",
-    "bundles/essay.bin"
+    "bundles/mapping.bin"
   ],
-  "mapping_question_and_map_data_unchanged": true,
   "bundle_sha256": {
-    "conquer": "27ec413db552bbb35c3ad15e4bc640c50bb3c68c5d829bba5c3c97b9593d895f",
+    "conquer": "c525f730b74a2a4dfd68052202c997ce9719d59542266db04c5c031926415954",
     "gs1": "dacf978ccd7186d2eef4ec836c17e18611fb7cebdf1753abe773f41e2447aa41",
     "gs2": "e942173f544312021b98de5208cb3d90499f229b4b0abb98a907e23323149228",
     "gs3": "b004f17e6059c9f2dae21eced9f07a431cd60e3681bd7aa5fac4e00d5e06d2ff",
@@ -97,15 +81,8 @@
     "assets": "24b418f0caba8b204bd1f01f9c5b5f424583eafff4ebe8c160a5bddb8a12e39a",
     "copies": "eb48a1d1be5c1096dccd9aab194baa71147aef6354be18db4dd80d1d59c05431",
     "essaycopies": "b53a8fdd0b6dc3cb346ec5d5c40b5b7a0803b540fee5be56c2271370914053e5",
-    "tracker": "56422f3c042c3c5ded81995fda986e3ea2e5fd88d5c8409621e19e4bc84939c9",
-    "mapping": "fdd10e7607e3ff85098484d2e62f4bbd1d2b1e1af5fd46fa7676ef8f7c404ebe",
-    "affairs": "dd4349d06dcf207f3642718be0035013eeffd047b857e9a54ca9dbfca7639ee8"
+    "tracker": "45ffff7595bf5b5e77f1f9269b451f1f206b86cbf88153501a7d97fe81e24a7b",
+    "mapping": "fdd10e7607e3ff85098484d2e62f4bbd1d2b1e1af5fd46fa7676ef8f7c404ebe"
   },
-  "limitations": [
-    "Needs a working provider key/model. Cannot bypass rate limits or create quota.",
-    "Transient errors retry while the workspace is open; a closed browser resumes when reopened, not on a background server.",
-    "Authentication, balance and unavailable-model failures require corrected settings.",
-    "Unreadable scanned PDFs need OCR; no OCR added.",
-    "Translations and evidence checks are model-generated, not a guarantee of factual perfection."
-  ]
+  "test_boundary": "Chromium on local static hosting, with deterministic simulated official-source/AI responses and deliberate fault injection. The original evaluation payload and actual Daily Target UI buttons were exercised. No user key or GitHub/Vercel deployment access was available. Synthetic stress-test timings are not live-provider speed claims."
 }

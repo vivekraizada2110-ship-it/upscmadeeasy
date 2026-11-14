@@ -28,15 +28,9 @@ function inject(html,id,assets){
  if(id!=='conquer'&&id!=='tracker'&&id!=='mapping')boot+=scriptTag(assets['pdf-lib.min.js']);
  boot+=scriptTag('window.__SUITE_WORKER__="";if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc="";');
  // Explicit main-thread WorkerMessageHandler keeps PDF reading independent of file-origin worker restrictions.
- const doc=html.replace(/<head([^>]*)>/i,m=>m+boot); const extra=(id==='tracker'||id==='mapping'||id==='affairs')?'':scriptTag(id==='conquer'?sharedConnectionBridges.prelims:sharedConnectionBridges.atlas); const position=doc.lastIndexOf('</body>'); return position>=0?doc.slice(0,position)+extra+doc.slice(position):doc+extra;
+ const doc=html.replace(/<head([^>]*)>/i,m=>m+boot); const extra=(id==='tracker'||id==='mapping'||id==='affairs')?'':scriptTag(id==='conquer'?sharedConnectionBridges.prelims:sharedConnectionBridges.atlas); const evidenceExtra=['gs1','gs2','gs3','gs4','essay','anthro'].includes(id)?'<script src="/assets/evidence-atlas.js"></scr'+'ipt>':''; const position=doc.lastIndexOf('</body>'); return position>=0?doc.slice(0,position)+extra+evidenceExtra+doc.slice(position):doc+extra+evidenceExtra;
 }
 
-let affairsMount=null;
-window.mountCurrentAffairs=async function(host){
- if(affairsMount){host.replaceChildren(await affairsMount);return;}
- affairsMount=(async()=>{const [html,assets]=await Promise.all([unpack('affairs'),getAssets()]);const f=host.ownerDocument.createElement('iframe');f.id='prelims-current-affairs';f.title='PIB & Yojana';f.style.cssText='display:block;width:100%;height:calc(100vh - 140px);min-height:700px;border:0;background:#0a0a0a';host.replaceChildren(f);f.srcdoc=inject(html,'affairs',assets);return f;})();
- try{await affairsMount;}catch(e){affairsMount=null;throw e;}
-};
 function fail(id,message){const bad=frames.get(id);if(bad)bad.dataset.failed='true';clearTimeout(timers.get(id));timers.delete(id);pending.delete(id);if(active===id){status.textContent=appNames[id]+' · retry available';showLoading(message,true);}}
 window.openApp=async function(id,retry){if(!window.ConquerAccess?.granted){window.__pendingApp=id;return;}if(window.ConquerTracker?.guard(id))id='tracker';if(!ids.includes(id))return;active=id;document.querySelectorAll('nav [role="tab"]').forEach(b=>{const selected=b.id==='tab-'+id;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;});if(retry){const old=frames.get(id);if(old)old.remove();frames.delete(id);pending.delete(id);clearTimeout(timers.get(id));}
  for(const [key,frame] of frames)frame.hidden=key!==id;

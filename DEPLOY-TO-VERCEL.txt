@@ -1,132 +1,56 @@
-CURRENT AFFAIRS UPDATE — READ FIRST
-PIB & Yojana is now under PRELIMS PRACTICE (not Mapping Atlas).
-Upload/replace the FULL contents of this package in the same repository root; this is not
-an index-only or three-file update. Keep the existing production domain for browser-data continuity.
-Do not run any CMD/Python launcher on your computer. Vercel hosts the existing API functions.
+NATIVE PRELIMS CURRENT AFFAIRS — COMPLETE REPOSITORY UPDATE
 
-NEW BEHAVIOUR
-- Temporary provider errors retry automatically. Two workers overlap retrieval/generation.
-- Retry-After guidance is honoured. Exponential retry delay grows to a five-minute ceiling;
-  a longer provider-requested wait is honoured. Pause stops retrying and aborts client requests.
-- Closing/refreshing preserves dates, source, results, selection, completed questions and queue.
-  Reopen the site and log in normally; the saved current-affairs page and unfinished queue restore.
-  Generation runs in the open browser, not as an unattended Vercel background job.
-- Invalid credentials, payment/access failures or an unavailable model (401/402/403/404) stop safely
-  with the reason instead of retrying the same permanent account error indefinitely.
-- Existing saved source sets are copied from the old Mapping store on the first current-affairs open.
-  Original Mapping data is retained for safety; no automatic destructive migration occurs.
-- IndexedDB holds current-affairs state and cached source text/translations; do not clear site data.
-- One browser tab owns the current-affairs workspace at a time so stale tabs cannot overwrite progress.
-- Delete set, restart set, retry article errors, clear attempt history, and start-over controls confirm
-  destructive operations. Clearing history leaves question sets intact.
-- Hindi and mixed-language PIB bodies are not rejected. Questions/explanations are English; source
-  evidence remains in its original language. Read / translate displays a full English translation,
-  cached after the first translation. Generation/translation still require your working AI provider.
-- Unreadable/missing releases are labelled with title, date, ID and an exact official link.
-- Scanned/image-only PDFs still need OCR; this update does NOT add an OCR engine.
-- Optional backup providers are used only if YOU enabled them in shared AI settings. Normal provider
-  charges apply. A browser-side abort cannot guarantee the upstream provider stops work/billing.
+1. Back up/export important study data on your EXISTING production domain first.
+2. Extract the ZIP. Upload/replace ALL its contents in the same GitHub repository root:
+   index.html, assets/, bundles/, api/, lib/, requirements.txt, .python-version and vercel.json.
+   This is NOT an index-only or three-file update. Remove the retired bundles/affairs.bin
+   if it is still present in your repository. It is no longer referenced or needed.
+3. Deploy a preview with the current Vercel project. Framework: Other; root: this directory;
+   output directory: .; no custom build command. Retain native Python function detection.
+4. Open YOUR-DEPLOYMENT/api/archive?action=health. It must return JSON, not the site shell.
+   Do not add a catch-all rewrite from every path to index.html: /assets, /bundles and /api
+   must remain real files/function routes.
+5. Promote after testing. Keep the SAME PRODUCTION DOMAIN to keep its browser data.
+   Hard-refresh once after deployment. Do not clear browser storage to force an update.
+   No CMD window or Python installation on the visitor’s PC is required.
 
-VERIFICATION BOUNDARY FOR THIS UPDATE
-The bundled VERIFICATION.json distinguishes live official-source retrieval from simulated-provider
-fault-injection tests. No user API key was available, and no deployment was made to your Vercel account.
-Use a preview deployment first. A successful browser test cannot guarantee provider capacity or quotas.
+WHAT THIS UPDATE CHANGES
+- PIB/Yojana/current-affairs PDF ingestion is a native Prelims section. The second nested
+  iframe/app has been removed. The normal Prelims Quiz, Subject Bank, History, Mistakebook,
+  Revision and tests use the SAME generated questions and attempt records.
+- Existing isolated source sets and attempts are migrated into the native Prelims schema once.
+  Originals are retained in the old browser store for recovery, not silently destroyed.
+- Manual Retry now exists for individual failed/waiting articles and whole sets.
+  Unfinished/error lists are searchable by title/ID; the first 100 matching entries are shown.
+- Up to four source articles share an AI call; one to three parallel batches are selectable
+  (default two). Long batches split at a safe text limit; source text is not silently truncated.
+  Temporary provider errors retry with exponential backoff and Retry-After guidance.
+- Native Prelims data is persisted in IndexedDB, avoiding localStorage’s smaller size limit.
+- Native Quiz/Subject Bank sets can be renamed. Existing source citations remain attached.
+- Standard Prelims PDF uploads and the PIB/Yojana PDF route index relevant Mains source text.
+  Generated article results include evidence-checked Mains extracts for GS1–4, Essay and
+  Anthropology as relevant. Source libraries and evaluation retrieval use those dated extracts.
+- Exact duplicate content/claims are deduplicated. Explicit corrections to an identified older
+  fact in the SAME authority/series replace that active fact. Historical reporting periods or
+  ambiguous disagreements are not blindly deleted. Evaluations refresh shared evidence so a
+  superseded card is not reused from an earlier answer draft.
+- Daily Target coaching uses the selected shared provider directly, without an extra model-list
+  request or a legacy hardcoded inference call. Failures show their reason beside coaching,
+  preserving the submitted record; the button re-enables. No persisted coaching-busy flag.
 
-CONQUER UPSC + MAPPING ATLAS — GITHUB / VERCEL HANDOFF
-
-THIS IS A COMPLETE REPOSITORY PACKAGE, NOT AN INDEX-ONLY UPDATE.
-No local connector, Python installation on your PC, or CMD window is required after deployment.
-Do not upload just index.html: bundles/, assets/, api/, lib/ and configuration files are essential.
-
-SAFE UPDATE OF YOUR EXISTING SITE
-1. Export important study backups from your current workspaces first. Make a backup branch in GitHub.
-2. Extract this ZIP on your computer. Open the extracted folder containing index.html.
-3. On a NEW GitHub branch, upload its CONTENTS to your website repository root:
-   index.html
-   assets/         shared AI, entrance, tracker, branding and frame loader
-   bundles/        original checksum-verified workspaces/libraries + Mapping Atlas
-   api/            ai.py and archive.py — Vercel Python Functions
-   lib/            archive parsing/PDF extraction helpers
-   requirements.txt
-   .python-version
-   vercel.json
-   .gitignore / .vercelignore
-   DEPLOY-TO-VERCEL.txt and VERIFICATION.json (optional on the public site)
-   Preserve any unrelated repository files. If your repository already has custom API/configuration
-   files, reconcile those rather than deleting unrelated functionality.
-   No individual file exceeds GitHub's 25 MB browser-upload limit.
-4. In the Vercel project connected to that repository:
-   - Framework preset: Other (no static-export-only preset).
-   - Root directory: the directory with index.html, vercel.json and requirements.txt.
-   - Build command: no custom build; the supplied configuration uses an empty build command.
-   - Output directory: . (project root), as supplied in vercel.json.
-   - Python: 3.12, supplied by .python-version. Vercel installs requirements.txt.
-   - The api/*.py files are native Python serverless functions; do not disable function detection.
-   - maxDuration is 300 seconds; use a current Fluid-compute configuration that permits this duration.
-     Your Vercel account/plan still determines its available limits and hosting charges.
-   - No API key environment variable is required. Each user configures their own key in the website.
-5. Create/test a PREVIEW deployment for the branch before merging/promoting it to production.
-6. Visit YOUR-PREVIEW-URL/api/archive?action=health
-   Expected JSON: {"ok":true,"version":4,"mode":"stateless-vercel"}
-   A 404/HTML response means the API files were not deployed as functions; do not promote that build.
-7. Log in using your EXISTING entrance credentials; they were not changed.
-   Open all nine tabs, then AI providers. Select the provider, paste the matching key,
-   save its exact model ID, and explicitly Test connection. A successful test in one page applies
-   to all workspaces. Fetch live models if your account cannot access the typed model.
-8. Open Prelims Practice > PIB & Yojana and test one date range. Generate one selected item first.
-9. After these account-side checks pass, merge/promote the preview through your normal Vercel workflow.
-
-WHAT CHANGED
-- Mapping Atlas is a ninth workspace, using your original Conquer logo and yellow/black branding.
-- Shared Gemini / OpenRouter / xAI Grok connection works in Daily Targets, Prelims, GS1-GS4,
-  Essay, Anthropology and Mapping. Grok (xAI) and Groq are distinct providers.
-- Existing Prelims Claude/OpenAI and Mapping Groq/DeepSeek options are retained in shared settings.
-- Gemini default remains gemini-3.5-flash-lite; explicit model IDs are never silently renamed.
-- Root HTML loads lazily rather than parsing the entire 35 MB embedded package at startup.
-- Unrelated study-bank/content packs are unchanged. The Prelims and Mapping app bundles now include the requested navigation changes; Current Affairs has its own bundle.
-- Startup has bounded timeouts and a recoverable Retry opening button.
-- Other workspaces retain the previous bounded AI retries. The PIB/Yojana queue now retries transient 429/5xx/network/timeouts automatically, with backoff and user pause.
-  Optional cross-provider fallback is OFF unless the user explicitly enables it.
-- Source archive requests are STATELESS. No local CMD connector or in-memory job/polling dependency.
-- Uploaded Yojana PDF text is extracted in the browser instead of sending a huge base64 file to Vercel.
-- Large Gemini attachments preserve the original direct-to-Google path; other requests use the
-  fixed-destination same-origin proxy. Non-Gemini PDF pages are rendered locally for vision models.
-
-DATA / SECURITY / LIMITS — PLEASE READ
-- Keep the same deployed domain to retain that domain's existing browser storage.
-  Study data from another domain or localhost is separate and needs its existing export/import tools.
-- Your original entrance screen is preserved. Its client-side password is NOT server authentication.
-  Anyone can inspect public frontend assets. For a private website use Vercel Deployment Protection
-  or a proper authenticated backend. No claim of production access control is made by the entrance.
-- Keys are never hardcoded into the repository or saved by the server-side application code.
-  Remembered keys live in browser localStorage, which is not encrypted. Do not use shared browsers.
-- Provider/API billing is separate from a consumer chat subscription. xAI Grok/direct DeepSeek and
-  many other model endpoints are paid. OpenRouter free-model availability is not guaranteed.
-- A hosted proxy cannot create provider capacity, remove rate limits, or guarantee account access.
-- Image/PDF-answer tasks need a vision-capable provider model. Use smaller selections if the hosted
-  body limit is reached (the site checks the limit before posting). Non-Gemini PDF batches are capped
-  at 12 selected pages; available payload/model limits may require fewer. No document pages are
-  silently dropped. Gemini direct requests remain subject to Google's own limits/CORS.
-- PIB scope is the official English PIB Delhi archive, all ministries; regional-office archives are not
-  silently claimed. Source retrieval still depends on upstream government websites.
-- Yojana loads the EXACT English issue listed in the official Publications Division public archive.
-  That public archive may lag publication. Missing issues are reported, not replaced by another month.
-  Upload your English issue PDF if necessary. Scanned pages without extractable text require OCR.
-- Other-provider schemas are provided in system instructions; original client validators still reject
-  invalid output. Model-generated content is not guaranteed factually perfect.
-
-VERIFICATION BOUNDARY
-- Browser startup/navigation, preserved packs, PDF handling, provider request routing, response parsing,
-  cancellation/retry, and actual public archive/PDF retrieval were tested before packaging.
-- Provider replies were simulated: no personal paid/free API key was available for live inference tests.
-- A real Vercel deployment was NOT created here; no access to your GitHub/Vercel account was provided.
-  Therefore the authenticated preview/deployment checks in steps 5-9 still need to run in your account.
-- See VERIFICATION.json for the recorded test results and preservation hashes.
-
-OFFICIAL IMPLEMENTATION REFERENCES
-https://vercel.com/docs/functions/runtimes/python/api-directory
-https://vercel.com/docs/functions/runtimes/python
-https://vercel.com/docs/functions/limitations
-https://vercel.com/docs/project-configuration/vercel-json
-https://openrouter.ai/docs/guides/features/structured-outputs
-https://docs.x.ai/developers/model-capabilities/legacy/chat-completions
+BOUNDARIES — NO UNCONDITIONAL SUCCESS CLAIM
+- The tests in VERIFICATION.json distinguish actual browser workflows from simulated upstream
+  replies. AI faults/replies were intercepted test fixtures, not live requests using your key.
+- The 1,260-article stress run validates local queue completion and 315 batched generation calls;
+  its time is NOT a real-provider speed benchmark. Capacity, quotas, network/PIB latency and
+  provider billing still apply. An invalid key, missing balance or unavailable model needs fixing.
+- Jobs run in the open browser, not an unattended Vercel background queue. Browser suspension,
+  closing the device or OS sleep can stop work; reopening restores saved progress.
+- Scanned/image-only PDFs need OCR; this update does not pretend an empty text layer was read.
+- A quote-match check is not proof that AI reasoning or an English translation is factually perfect.
+- User-uploaded source dates are based on the selected issue period/upload context. Confirm the
+  original publication/reporting period before relying on a statistic as current.
+- No deployment was made to your GitHub/Vercel account; preview checks remain account-side.
+- Original entrance credentials and unrelated study banks/answer-evaluation schemas are retained.
+  The client-side entrance password is not server authentication. Use real deployment protection
+  or a proper authenticated backend for a private website. Remembered keys are browser-local.
